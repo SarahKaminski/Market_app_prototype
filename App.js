@@ -1,47 +1,41 @@
 import React, { useState } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, Platform } from 'react-native';
 
-// Adicionei URLs de imagens para os produtos
 const produtos = [
   {
     id: '1',
     nome: 'Arroz 5kg',
     preco: 15.99,
     descricao: 'Arroz tipo 1, pacote de 5kg. Grãos selecionados e de alta qualidade.',
-    categoria: 'Alimentos básicos',
-    imagem: 'https://m.media-amazon.com/images/I/71kFQCDCkBL._AC_UF1000,1000_QL80_.jpg'
+    categoria: 'Alimentos básicos'
   },
   {
     id: '2',
     nome: 'Feijão 1kg',
     preco: 7.50,
     descricao: 'Feijão carioca, pacote de 1kg. Rico em nutrientes e proteínas.',
-    categoria: 'Alimentos básicos',
-    imagem: 'https://www.paodeacucar.com/img/uploads/1/247/508247.jpg'
+    categoria: 'Alimentos básicos'
   },
   {
     id: '3',
     nome: 'Óleo de Soja 900ml',
     preco: 4.99,
     descricao: 'Óleo de soja refinado, garrafa de 900ml. Ideal para frituras e preparos.',
-    categoria: 'Alimentos básicos',
-    imagem: 'https://www.paodeacucar.com/img/uploads/1/3/508003.jpg'
+    categoria: 'Alimentos básicos'
   },
   {
     id: '4',
     nome: 'Sabão em Pó 1kg',
     preco: 12.90,
     descricao: 'Sabão em pó para roupas, embalagem de 1kg. Remove as manchas mais difíceis.',
-    categoria: 'Limpeza',
-    imagem: 'https://m.media-amazon.com/images/I/71+UYj5Qb-L._AC_UF1000,1000_QL80_.jpg'
+    categoria: 'Limpeza'
   },
   {
     id: '5',
     nome: 'Desinfetante 2L',
     preco: 8.75,
     descricao: 'Desinfetante aroma pinho, frasco de 2 litros. Elimina 99,9% dos germes.',
-    categoria: 'Limpeza',
-    imagem: 'https://www.paodeacucar.com/img/uploads/1/262/508262.jpg'
+    categoria: 'Limpeza'
   },
 ];
 
@@ -75,7 +69,7 @@ const App = () => {
         setTelaAtual('detalhes');
       }}
     >
-      <Image source={{ uri: item.imagem }} style={styles.imagem} />
+      <View style={styles.imagemPlaceholder} />
       <View style={styles.info}>
         <Text style={styles.nome} numberOfLines={1}>{item.nome}</Text>
         <Text style={styles.categoria}>{item.categoria}</Text>
@@ -95,7 +89,7 @@ const App = () => {
 
   const renderizarDetalhes = () => (
     <View style={styles.detalhesContainer}>
-      <Image source={{ uri: produtoSelecionado.imagem }} style={styles.detalhesImagem} />
+      <View style={styles.detalhesImagemPlaceholder} />
       <View style={styles.detalhesConteudo}>
         <Text style={styles.detalhesNome}>{produtoSelecionado.nome}</Text>
         <Text style={styles.detalhesCategoria}>{produtoSelecionado.categoria}</Text>
@@ -130,7 +124,10 @@ const App = () => {
   const renderizarCarrinho = () => (
     <View style={styles.carrinhoContainer}>
       <View style={styles.carrinhoHeader}>
-        <TouchableOpacity onPress={() => setTelaAtual('produtos')}>
+        <TouchableOpacity 
+          style={styles.botaoVoltarContainer}
+          onPress={() => setTelaAtual('produtos')}
+        >
           <Text style={styles.botaoVoltarTexto}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.titulo}>Seu Carrinho</Text>
@@ -155,7 +152,7 @@ const App = () => {
             data={carrinho}
             renderItem={({ item }) => (
               <View style={styles.itemCarrinho}>
-                <Image source={{ uri: item.imagem }} style={styles.carrinhoImagem} />
+                <View style={styles.carrinhoImagemPlaceholder} />
                 <View style={styles.carrinhoInfo}>
                   <Text style={styles.carrinhoNome} numberOfLines={1}>{item.nome}</Text>
                   <Text style={styles.carrinhoPreco}>R$ {item.preco.toFixed(2)}</Text>
@@ -199,8 +196,10 @@ const App = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#6C63FF" />
+      
+      {Platform.OS === 'ios' && <SafeAreaView style={{ backgroundColor: '#6C63FF' }} />}
       
       {telaAtual === 'produtos' && (
         <>
@@ -224,13 +223,14 @@ const App = () => {
             renderItem={renderizarItem}
             keyExtractor={item => item.id}
             contentContainerStyle={styles.lista}
+            style={styles.listaContainer}
           />
         </>
       )}
       
       {telaAtual === 'detalhes' && renderizarDetalhes()}
       {telaAtual === 'carrinho' && renderizarCarrinho()}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -238,18 +238,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 10 : 20,
     backgroundColor: '#6C63FF',
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+  },
+  listaContainer: {
+    flex: 1,
   },
   titulo: {
     fontSize: 22,
@@ -282,6 +287,7 @@ const styles = StyleSheet.create({
   },
   lista: {
     padding: 10,
+    paddingBottom: 20,
   },
   item: {
     flexDirection: 'row',
@@ -296,11 +302,12 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
-  imagem: {
+  imagemPlaceholder: {
     width: 60,
     height: 60,
     borderRadius: 10,
     marginRight: 15,
+    backgroundColor: '#f0f0f0',
   },
   info: {
     flex: 1,
@@ -341,10 +348,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  detalhesImagem: {
+  detalhesImagemPlaceholder: {
     width: '100%',
-    height: 300,
-    resizeMode: 'cover',
+    height: 200,
+    backgroundColor: '#f0f0f0',
   },
   detalhesConteudo: {
     padding: 20,
@@ -394,14 +401,19 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   botaoVoltar: {
-    backgroundColor: '#f1f1f1',
+    backgroundColor: '#6C63FF',
     padding: 16,
     borderRadius: 10,
     alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  botaoVoltarContainer: {
+    padding: 8,
   },
   botaoVoltarTexto: {
     fontSize: 24,
-    color: '#6C63FF',
+    color: 'white',
     fontWeight: 'bold',
   },
   botaoTexto: {
@@ -418,6 +430,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 10 : 20,
     backgroundColor: '#6C63FF',
   },
   carrinhoVazioContainer: {
@@ -457,11 +470,12 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  carrinhoImagem: {
+  carrinhoImagemPlaceholder: {
     width: 50,
     height: 50,
     borderRadius: 8,
     marginRight: 15,
+    backgroundColor: '#f0f0f0',
   },
   carrinhoInfo: {
     flex: 1,
